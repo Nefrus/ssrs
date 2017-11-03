@@ -83,7 +83,7 @@ def EVP_BytesToKey(password, key_len, iv_len):
     key = ms[:key_len]
     # iv 为 key_len 至 key_len + iv_len 长度的二进制值
     iv = ms[key_len:key_len + iv_len]
-    print (cached_keys)
+
     cached_keys[cached_key] = (key, iv)
     return key, iv
 

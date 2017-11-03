@@ -114,7 +114,6 @@ class SelectLoop(object):
 
         r, w, x = select.select(self._r_list, self._w_list, self._x_list,
                                 timeout)
-        print(r, w, x,'qqqqqqqqqqqqqqqqqqqqqqq')
         results = defaultdict(lambda: POLL_NULL)
         for p in [(r, POLL_IN), (w, POLL_OUT), (x, POLL_ERR)]:
             for fd in p[0]:
