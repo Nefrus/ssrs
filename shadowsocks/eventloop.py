@@ -218,10 +218,10 @@ class EventLoop(object):
                     import traceback
                     traceback.print_exc()
                     continue
-           
+
             handle = False
             for sock, fd, event in events:
-                print('sock, fd, event',sock, fd, event)
+
                 handler = self._fdmap.get(fd, None)
                 if handler is not None:
                     handler = handler[1]

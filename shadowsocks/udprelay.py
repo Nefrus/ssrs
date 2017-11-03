@@ -359,9 +359,14 @@ class UDPRelay(object):
                     logging.warn("bind %s fail" % (bind_addr,))
 
     def _handle_server(self):
+        # 获取 socket
         server = self._server_socket
+        # 接收客户端数据 地址
         data, r_addr = server.recvfrom(BUF_SIZE)
+        print(data, r_addr)
+        print ('print(data, r_addr)')
         ogn_data = data
+        # 判断数据是否存在
         if not data:
             logging.debug('UDP handle_server: data is empty')
         if self._stat_callback:
@@ -623,6 +628,7 @@ class UDPRelay(object):
         client.destroy_local()
 
     def handle_event(self, sock, fd, event):
+        # 判断 sock 与 自己的 sock 是否相等
         if sock == self._server_socket:
             if event & eventloop.POLL_ERR:
                 logging.error('UDP server_socket err')
