@@ -363,8 +363,7 @@ class UDPRelay(object):
         server = self._server_socket
         # 接收客户端数据 地址
         data, r_addr = server.recvfrom(BUF_SIZE)
-        logging.info(data,r_addr)
-      
+
         ogn_data = data
         # 判断数据是否存在
         if not data:
