@@ -1255,13 +1255,19 @@ class TCPRelay(object):
         self._stat_callback = stat_callback
 
     def add_to_loop(self, loop):
+        # 判断是否存在
         if self._eventloop:
             raise Exception('already add to loop')
+        # 判断是否已经关闭
         if self._closed:
             raise Exception('already closed')
+        # 赋值
         self._eventloop = loop
+        # 赋值
         self._eventloop.add(self._server_socket,
                             eventloop.POLL_IN | eventloop.POLL_ERR, self)
+        # 添加回调
+        # 清除数据
         self._eventloop.add_periodic(self.handle_periodic)
 
     def remove_handler(self, client):
@@ -1493,14 +1499,21 @@ class TCPRelay(object):
         return handle
 
     def handle_periodic(self):
+        # 判断是否关闭
         if self._closed:
+            # 判断是否存在socket
             if self._server_socket:
+                # 移除
                 self._eventloop.removefd(self._server_socket_fd)
+                # 关闭
                 self._server_socket.close()
+                # 删除引用
                 self._server_socket = None
                 logging.info('closed TCP port %d', self._listen_port)
             for handler in list(self._fd_to_handlers.values()):
+                # 销毁handler
                 handler.destroy()
+        # 清除超时缓存
         self._sweep_timeout()
 
     def close(self, next_tick=False):

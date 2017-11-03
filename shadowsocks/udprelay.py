@@ -371,6 +371,7 @@ class UDPRelay(object):
         if self._stat_callback:
             self._stat_callback(self._listen_port, len(data))
         uid = None
+        # 判断是否在本地
         if self._is_local:
             frag = common.ord(data[2])
             if frag != 0:
@@ -380,31 +381,37 @@ class UDPRelay(object):
                 data = data[3:]
         else:
             ref_iv = [0]
+            # 数据解密
             data = encrypt.encrypt_all_iv(self._protocol.obfs.server_info.key, self._method, 0, data, ref_iv)
+            # 判断数据是否存在
             # decrypt data
             if not data:
                 logging.debug('UDP handle_server: data is empty after decrypt')
                 return
+
             self._protocol.obfs.server_info.recv_iv = ref_iv[0]
             data, uid = self._protocol.server_udp_post_decrypt(data)
 
         #logging.info("UDP data %s" % (binascii.hexlify(data),))
+        # 判断是否是本地
         if not self._is_local:
+            # 判断帐号密码是否正确
             data = pre_parse_header(data)
             if data is None:
                 return
 
         try:
+            # 解析协议是否正确
             header_result = parse_header(data)
         except:
             self._handel_protocol_error(r_addr, ogn_data)
             return
-
+        # 解析协议是否正确
         if header_result is None:
             self._handel_protocol_error(r_addr, ogn_data)
             return
         connecttype, addrtype, dest_addr, dest_port, header_length = header_result
-
+        # 判断是否是本地
         if self._is_local:
             addrtype = 3
             server_addr, server_port = self._get_a_server()
@@ -432,6 +439,10 @@ class UDPRelay(object):
                                         socket.SOCK_DGRAM, socket.SOL_UDP)
             if not addrs: # drop
                 return
+            # af 表示socket使用的协议簇。
+            # socktype 表示socket的类型。常见的socket类型包括SOCK_STREAM（TCP流）/SOCK_DGRAM（UDP数据报）/SOCK_RAW（原始套接字）。其中，SOCK_STREAM=1，SOCK_DGRAM=2，SOCK_RAW=3
+            # proto：顾名思义，就是指定协议。套接口所用的协议。如调用者不想指定，可用0。常用的协议有，IPPROTO_TCP(=6)和IPPTOTO_UDP(=17)，它们分别对应TCP传输协议、UDP传输协议。
+            # sa是(host,port)的二元组
             af, socktype, proto, canonname, sa = addrs[0]
             server_addr = sa[0]
             key = client_key(r_addr, af)
@@ -596,15 +607,21 @@ class UDPRelay(object):
         #'''
 
     def add_to_loop(self, loop):
+        # 判断是否存在
         if self._eventloop:
             raise Exception('already add to loop')
+        # 判断是否关闭
         if self._closed:
             raise Exception('already closed')
+        # 赋值
         self._eventloop = loop
-
+        # 赋值
         server_socket = self._server_socket
+        # 注册
         self._eventloop.add(server_socket,
                             eventloop.POLL_IN | eventloop.POLL_ERR, self)
+        # 设置回调
+        # 用来清除数据 释放资源
         loop.add_periodic(self.handle_periodic)
 
     def remove_handler(self, client):
@@ -655,22 +672,36 @@ class UDPRelay(object):
                 logging.warn('poll removed fd')
 
     def handle_periodic(self):
+        # 判断是否关闭
         if self._closed:
+            # 清除缓存
             self._cache.clear(0)
+            # 清楚缓存对象
             self._cache_dns_client.clear(0)
+            # 判断是否存在 _eventloop
             if self._eventloop:
+                # 移除定时回调
                 self._eventloop.remove_periodic(self.handle_periodic)
+                # 移除socket
                 self._eventloop.remove(self._server_socket)
+            # 判断是否存在 socket
             if self._server_socket:
+                # 关闭
                 self._server_socket.close()
+                # 清除引用
                 self._server_socket = None
                 logging.info('closed UDP port %d', self._listen_port)
         else:
+            # 获取 sockets 的长度
             before_sweep_size = len(self._sockets)
+            # 清除缓存
             self._cache.sweep()
+            # 清除 DNS 缓存
             self._cache_dns_client.sweep()
+
             if before_sweep_size != len(self._sockets):
                 logging.debug('UDP port %5d sockets %d' % (self._listen_port, len(self._sockets)))
+            # 清除时间缓存
             self._sweep_timeout()
 
     def close(self, next_tick=False):

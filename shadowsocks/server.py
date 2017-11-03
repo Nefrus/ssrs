@@ -40,7 +40,7 @@ def main():
     config = shell.get_config(False)
     # 打印 python 版本
     shell.log_shadowsocks_version()
-    # 指令检测？
+    # 指令
     daemon.daemon_exec(config)
 
     try:

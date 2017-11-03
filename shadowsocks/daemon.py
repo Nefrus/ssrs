@@ -30,14 +30,18 @@ from shadowsocks import common, shell
 
 def daemon_exec(config):
     if 'daemon' in config:
+        # 判断系统是否为 linux
         if os.name != 'posix':
             raise Exception('daemon mode is only supported on Unix')
         command = config['daemon']
+        # 判断 command 是否存在 若不存在 默认为 start
         if not command:
             command = 'start'
         pid_file = config['pid-file']
         log_file = config['log-file']
+        # 如果 command 为 start
         if command == 'start':
+
             daemon_start(pid_file, log_file)
         elif command == 'stop':
             daemon_stop(pid_file)
@@ -97,6 +101,7 @@ def daemon_start(pid_file, log_file):
             sys.exit(0)
         sys.exit(1)
 
+    # 设置信号处理
     signal.signal(signal.SIGINT, handle_exit)
     signal.signal(signal.SIGTERM, handle_exit)
 

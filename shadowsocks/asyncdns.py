@@ -359,7 +359,7 @@ class DNSResolver(object):
 
         # 双向绑定
         loop.add(self._sock, eventloop.POLL_IN, self)
-        # 设置超时处理
+        # 设置定时回调
         loop.add_periodic(self.handle_periodic)
 
     def _call_callback(self, hostname, ip, error=None):

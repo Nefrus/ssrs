@@ -121,6 +121,7 @@ class SelectLoop(object):
         return results.items()
 
     def register(self, fd, mode):
+        # 判断是输入还是输出
         if mode & POLL_IN:
             self._r_list.add(fd)
         if mode & POLL_OUT:
@@ -166,11 +167,17 @@ class EventLoop(object):
 
     def poll(self, timeout=None):
         events = self._impl.poll(timeout)
+        # fd 为 socket 描述文件 可看作id
+        # fd_map[fd] = (scoket, handler)
+        # 这个操作返回 scoket 、 socket 描述文件 、event
         return [(self._fdmap[fd][0], fd, event) for fd, event in events]
 
     def add(self, f, mode, handler):
+        # 获取 scoket 的文件描述符
         fd = f.fileno()
+        # _fdmap 赋值
         self._fdmap[fd] = (f, handler)
+        # 注册
         self._impl.register(fd, mode)
 
     def remove(self, f):
