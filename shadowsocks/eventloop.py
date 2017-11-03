@@ -202,8 +202,8 @@ class EventLoop(object):
         while not self._stopping:
             asap = False
             try:
-                # events 赋值   检查超时
-                # 我这里 events 为空
+                # events 赋值
+                # 处理连接
                 events = self.poll(TIMEOUT_PRECISION)
 
             except (OSError, IOError) as e:
@@ -218,9 +218,10 @@ class EventLoop(object):
                     import traceback
                     traceback.print_exc()
                     continue
-            print(events)
+           
             handle = False
             for sock, fd, event in events:
+                print('sock, fd, event',sock, fd, event)
                 handler = self._fdmap.get(fd, None)
                 if handler is not None:
                     handler = handler[1]
