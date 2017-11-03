@@ -218,7 +218,7 @@ class EventLoop(object):
                     import traceback
                     traceback.print_exc()
                     continue
-
+            print(events)
             handle = False
             for sock, fd, event in events:
                 handler = self._fdmap.get(fd, None)
